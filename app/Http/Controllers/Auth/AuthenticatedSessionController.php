@@ -42,4 +42,10 @@ class AuthenticatedSessionController extends Controller
         return response()->noContent();
        // return Redirect::to(env('FRONTEND_URL'));
     }
+    public function getUser(Request $request)
+    {
+      $id = $request->id;
+      $user = User::select(['name','email','phone','address'])->where('id','=',$id)->get();
+      return $user;
+    }
 }

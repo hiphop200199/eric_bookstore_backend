@@ -32,6 +32,13 @@ class CartController extends Controller
             return response()->json('added.');
         }
     }
+    public function editItem(Request $request): Response
+    {
+        $item_id = $request->id;
+        $amount = $request->amount;
+        DB::table('carts')->where('id','=', $item_id)->update(['amount'=> $amount]);
+        return response()->noContent();
+    }
     public function removeItem(Request $request): Response
     {
         $item_id = $request->id;
@@ -44,7 +51,7 @@ class CartController extends Controller
        $items = DB::table('products')->join('carts',function($join) use ($user_id){
         $join->on('products.id','=','carts.product_id')
         ->where('carts.user_id','=', $user_id);
-       })->select(['products.id','products.image_source','products.name','products.price','carts.amount'])
+       })->select(['carts.id','products.image_source','products.name','products.price','carts.amount'])
        ->get();
        return $items;
     }

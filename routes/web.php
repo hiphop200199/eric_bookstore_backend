@@ -13,5 +13,7 @@ Route::get('getMonthlyNewProducts',[ProductController::class,'getMonthlyNewProdu
 Route::get('getProduct',[ProductController::class,'getProduct']);
 Route::get('getItems',[CartController::class,'getItems']);
 Route::post('addItem',[CartController::class,'addItem']);
+Route::put('editItem',[CartController::class,'editItem']);
 Route::delete('removeItem',[CartController::class,'removeItem']);
+
 require __DIR__.'/auth.php';
