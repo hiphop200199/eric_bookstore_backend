@@ -18,6 +18,9 @@ return new class extends Migration
             $table->integer('total_price');
             $table->string('status',30);
             $table->string('invoice',100);
+            $table->string('receiver_name',100);
+            $table->string('receiver_tel',100);
+            $table->string('receiver_address',100);
             $table->string('pickup',30);
             $table->timestamps();
         });

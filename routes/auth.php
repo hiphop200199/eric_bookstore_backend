@@ -36,3 +36,4 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
 Route::get('getUser',[AuthenticatedSessionController::class,'getUser']);
+Route::put('editUser', [AuthenticatedSessionController::class,'editUser']);

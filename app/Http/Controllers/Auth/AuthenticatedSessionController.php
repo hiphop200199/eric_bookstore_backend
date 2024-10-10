@@ -48,4 +48,12 @@ class AuthenticatedSessionController extends Controller
       $user = User::select(['name','email','phone','address'])->where('id','=',$id)->get();
       return $user;
     }
+    public function editUser(Request $request)
+    {
+      $id = $request->id;
+      $phone = $request->phone;
+      $address = $request->address;
+      User::where('id','=',$id)->update(['phone'=>$phone,'address'=>$address]);
+      return response()->noContent();
+    }
 }
