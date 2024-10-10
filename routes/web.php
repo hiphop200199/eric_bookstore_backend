@@ -15,5 +15,6 @@ Route::get('getItems',[CartController::class,'getItems']);
 Route::post('addItem',[CartController::class,'addItem']);
 Route::put('editItem',[CartController::class,'editItem']);
 Route::delete('removeItem',[CartController::class,'removeItem']);
+Route::post('checkout',[CartController::class,'checkout']);
 
 require __DIR__.'/auth.php';
