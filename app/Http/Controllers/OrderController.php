@@ -67,12 +67,13 @@ class OrderController extends Controller
     public function getOrders(Request $request)
     {
         $id = $request->id;
-        $orders = order::select('id','payment','total_price','status','created_at')->where('user_id','=', $id)->get();
+        $orders = order::select('id','payment_status','total_price','pickup_status','created_at')->where('user_id','=', $id)->get();
         return $orders;
     }
     public function getOrder(Request $request)
     {
        $id = $request->id;
-       $order = order_detail::select('id','name','amount','price','discount','final_price')->where();
+       $order = order_detail::select('id','name','amount','price','discount','final_price')->where('order_id','=', $id)->get();
+       return $order;
     }
 }

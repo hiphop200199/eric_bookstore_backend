@@ -3,13 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\cart;
+use App\Models\order;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Models\order_detail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Stripe\Checkout\Session;
 use Stripe\Stripe;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class CartController extends Controller
 {
@@ -60,33 +63,64 @@ class CartController extends Controller
     public function checkout(Request $request)
     {
         $user_id = $request->id;
-        $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET_KEY'));
-        //Stripe::setApiKey(env('STRIPE_SECRET_KEY')); //api key
+        $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET_KEY'));//api key
+        
 
         $items = cart::join('products', function ($join) use ($user_id) {
             $join->on('carts.product_id', '=', 'products.id')->where('carts.user_id', '=', $user_id);
-        })->select(['carts.id', 'carts.amount', 'products.name', 'products.price','products.image_source'])->get(); //撈購物車內所有的東西
+        })->select(['carts.id','carts.product_id', 'carts.amount', 'products.name', 'products.price','products.image_source'])->get(); //撈購物車內所有的東西
         $lineItems = []; //stripe用來定義商品的資訊
+        $totalPrice = 0;//總金額
         foreach ($items as $item) {
-            $lineItems[] =  [[
+            $lineItems[] =  [
                 'price_data' => [
                     'currency' => 'usd',
                     'product_data' => [
                         'name' => $item->name,
                         'images' => [$item->image_source]
                     ],
-                    'unit_amount' => $item->price,
+                    'unit_amount' => $item->price*100, //用美分計算，所以要*100轉換成美元
                 ],
                 'quantity' => $item->amount,
-            ]];
+            ];
+            $totalPrice += $item->price * $item->amount;
         }
         try{
+            //建立結帳session
             $checkout_session = $stripe->checkout->sessions->create([
                 'line_items' => $lineItems,
                 'mode' => 'payment',
-                'success_url' => env('FRONTEND_URL')."/success?session_id={CHECKOUT_SESSION_ID}",
-                'cancel_url' => env('FRONTEND_URL').'/cancel',
+                'success_url' => 'http://localhost:5173'.'/eric_bookstore'.'/success?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => 'http://localhost:5173'.'/eric_bookstore'.'/cancel',
             ]);
+            //產生未付款訂單
+            $order = order::create([
+                'user_id'=> $user_id,
+                'session_id'=> $checkout_session->id,
+                'payment'=>'信用卡',
+                'total_price'=>$totalPrice,
+                'payment_status'=>'未付款',
+                'invoice'=>'123',
+                'receiver_name'=>'eric',
+                'receiver_tel'=>'123',
+                'receiver_address'=>'star road',
+                'pickup'=>'宅配',
+                'pickup_status'=>'待出貨'
+            ]);
+            //產生訂單明細
+            foreach($items as $item){
+                order_detail::create([
+                    'order_id'=> $order->id,
+                    'product_id'=> $item->product_id,
+                    'name'=> $item->name,
+                    'amount'=> $item->amount,
+                    'price'=> $item->price,
+                    'discount'=>0,
+                    'final_price'=> $item->price * $item->amount,
+                ]);
+            }
+           //清除該使用者的購物車
+           cart::where(['user_id'=>$user_id])->delete();
             return response()->json(['url'=> $checkout_session->url]);
            
         }catch (\Exception $e){
@@ -94,4 +128,32 @@ class CartController extends Controller
         }
       
     }
+    public function success(Request $request)
+    {
+        $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET_KEY'));//api key
+
+        try {
+            //核對session_id
+            $session_id = $request->session_id;
+            $session = $stripe->checkout->sessions->retrieve($session_id);
+            if(! $session){
+                return response()->json(['message'=>'Invalid Session ID']);
+            }
+            //找對應session_id的訂單
+            $order = order::where('session_id','=', $session_id)->first();
+            
+            if(! $order){
+               throw new NotFoundHttpException();
+            }
+            //更新訂單付款狀態
+            $order->update(['payment_status'=>'已付款']);
+            return response()->json(['message'=> 'done.']);
+        }catch(NotFoundHttpException $e){
+            throw $e;
+        }
+         catch (\Exception $e) {
+          return response()->json(['error'=> $e->getMessage()]);
+        }
+    }
+   
 }
