@@ -23,7 +23,7 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         $id = User::select("id")->where("email","=",$request->email)->get();
-
+        
         return response()->json($id);
       // return Redirect::to(env('FRONTEND_URL'));
     }

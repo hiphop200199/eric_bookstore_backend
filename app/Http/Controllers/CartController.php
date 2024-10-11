@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\cart;
 use App\Models\order;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Mail\Checkout;
+use Illuminate\Support\Facades\Mail;
 use App\Models\order_detail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -147,6 +150,10 @@ class CartController extends Controller
             }
             //更新訂單付款狀態
             $order->update(['payment_status'=>'已付款']);
+            //付款成功後寄感謝信給客戶
+            $user_id = $request->id;
+            $user = User::where('id','=',$user_id)->first();
+            Mail::to($user)->send(new Checkout($user));
             return response()->json(['message'=> 'done.']);
         }catch(NotFoundHttpException $e){
             throw $e;
