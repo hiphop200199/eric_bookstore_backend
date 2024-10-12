@@ -74,12 +74,12 @@ class ProductController extends Controller
             ->paginate(10);
             return $products;
         }
-        $products = Product::paginate(10);
+        $products = Product::select(['id','image_source','name','price'])->paginate(10);
         return $products;
     }
     public function getMonthlyNewProducts()
     {
-        $products = Product::whereBetween('launched_date', [date('2024-10-01'), date('Y-m-d')])->paginate(10);
+        $products = Product::select(['id','image_source','name','price'])->whereBetween('launched_date', [date('2024-10-01'), date('Y-m-d')])->paginate(10);
         return $products;
     }
     public function getPopularProducts()

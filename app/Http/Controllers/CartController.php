@@ -66,6 +66,9 @@ class CartController extends Controller
     public function checkout(Request $request)
     {
         $user_id = $request->id;
+        $receiver_name = $request->receiverName;
+        $receiver_tel = $request->receiverTel;
+        $receiver_address = $request->receiverAddress;
         $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET_KEY'));//api key
         
 
@@ -103,10 +106,10 @@ class CartController extends Controller
                 'payment'=>'信用卡',
                 'total_price'=>$totalPrice,
                 'payment_status'=>'未付款',
-                'invoice'=>'123',
-                'receiver_name'=>'eric',
-                'receiver_tel'=>'123',
-                'receiver_address'=>'star road',
+                'invoice'=>'fdvg15d61d65grt1rgres',
+                'receiver_name'=>$receiver_name,
+                'receiver_tel'=>$receiver_tel,
+                'receiver_address'=>$receiver_address,
                 'pickup'=>'宅配',
                 'pickup_status'=>'待出貨'
             ]);
