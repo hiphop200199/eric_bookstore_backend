@@ -11,6 +11,7 @@ Route::get('/', function () {
 
 Route::get('getProducts',[ProductController::class,'getProducts']);
 Route::get('getMonthlyNewProducts',[ProductController::class,'getMonthlyNewProducts']);
+Route::get('getPopularProducts',[ProductController::class,'getPopularProducts']);
 Route::get('getProduct',[ProductController::class,'getProduct']);
 Route::get('getItems',[CartController::class,'getItems']);
 Route::post('addItem',[CartController::class,'addItem']);

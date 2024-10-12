@@ -73,7 +73,9 @@ class OrderController extends Controller
     public function getOrder(Request $request)
     {
        $id = $request->id;
-       $order = order_detail::select('id','name','amount','price','discount','final_price')->where('order_id','=', $id)->get();
+       $order = order_detail::join('products',function($join){
+        $join->on('order_details.product_id','=','products.id');    
+       })->select('order_details.id','order_details.name','order_details.amount','order_details.price','order_details.discount','order_details.final_price','products.image_source')->where('order_id','=', $id)->get();
        return $order;
     }
 }

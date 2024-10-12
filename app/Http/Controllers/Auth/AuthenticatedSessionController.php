@@ -54,6 +54,7 @@ class AuthenticatedSessionController extends Controller
       $phone = $request->phone;
       $address = $request->address;
       User::where('id','=',$id)->update(['phone'=>$phone,'address'=>$address]);
-      return response()->noContent();
+      $user = User::select(['name','email','phone','address'])->where('id','=',$id)->first();
+      return response()->json($user);
     }
 }
