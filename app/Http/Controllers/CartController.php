@@ -7,6 +7,7 @@ use App\Models\order;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Jobs\sendMail;
 use App\Mail\Checkout;
 use Illuminate\Support\Facades\Mail;
 use App\Models\order_detail;
@@ -70,7 +71,7 @@ class CartController extends Controller
         $receiver_tel = $request->receiverTel;
         $receiver_address = $request->receiverAddress;
         $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET_KEY'));//api key
-        
+
 
         $items = cart::join('products', function ($join) use ($user_id) {
             $join->on('carts.product_id', '=', 'products.id')->where('carts.user_id', '=', $user_id);
@@ -128,11 +129,11 @@ class CartController extends Controller
            //清除該使用者的購物車
            cart::where(['user_id'=>$user_id])->delete();
             return response()->json(['url'=> $checkout_session->url]);
-           
+
         }catch (\Exception $e){
             return response()->json(['error'=> $e->getMessage()]);
         }
-      
+
     }
     public function success(Request $request)
     {
@@ -147,7 +148,7 @@ class CartController extends Controller
             }
             //找對應session_id的訂單
             $order = order::where('session_id','=', $session_id)->first();
-            
+
             if(! $order){
                throw new NotFoundHttpException();
             }
@@ -156,7 +157,8 @@ class CartController extends Controller
             //付款成功後寄感謝信給客戶
             $user_id = $request->id;
             $user = User::where('id','=',$user_id)->first();
-            Mail::to($user)->send(new Checkout($user));
+            //Mail::to($user)->send(new Checkout($user));
+            sendMail::dispatch($user,new Checkout($user));
             return response()->json(['message'=> 'done.']);
         }catch(NotFoundHttpException $e){
             throw $e;
@@ -165,5 +167,5 @@ class CartController extends Controller
           return response()->json(['error'=> $e->getMessage()]);
         }
     }
-   
+
 }

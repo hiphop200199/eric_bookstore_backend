@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\sendMail;
 use App\Mail\Welcome;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
@@ -35,7 +36,7 @@ class RegisteredUserController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->string('password')),       
+            'password' => Hash::make($request->string('password')),
             'phone'=> $request->tel,
             'address'=> $request->address,
         ]);
@@ -47,7 +48,8 @@ class RegisteredUserController extends Controller
         $id = User::select("id")->where("email","=",$user->email)->get();
 
         //註冊成功後寄email歡迎新使用者
-        Mail::to($user)->send(new Welcome($user));
+        //Mail::to($user)->send(new Welcome($user));
+        sendMail::dispatch($user,new Welcome($user));
         return response()->json($id);
       // return Redirect::to(env('FRONTEND_URL'));
     }

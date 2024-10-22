@@ -17,7 +17,7 @@ class ProductController extends Controller
             $products = DB::table("products")->select(['id','image_source','name','price'])
             ->where('name','LIKE','%'.$text.'%')
             ->orWhere('introduction','LIKE','%'.$text.'%')
-            ->paginate(10);
+            ->paginate(10)->appends('text',$text);
             return $products;
         }
         $products = Product::select(['id','image_source','name','price'])->paginate(10);
