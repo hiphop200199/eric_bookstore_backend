@@ -21,7 +21,7 @@ class sendMail implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle()
     {
         try {
 
