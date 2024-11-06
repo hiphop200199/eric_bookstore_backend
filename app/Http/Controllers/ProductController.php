@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ProductController extends Controller
 {
@@ -17,10 +18,15 @@ class ProductController extends Controller
             $products = DB::table("products")->select(['id','image_source','name','price'])
             ->where('name','LIKE','%'.$text.'%')
             ->orWhere('introduction','LIKE','%'.$text.'%')
+            ->orderByDesc('published_date')
             ->paginate(10)->appends('text',$text);
             return $products;
         }
-        $products = Product::select(['id','image_source','name','price'])->paginate(10);
+        $products = Cache::remember('products',60,function(){
+            return  Product::select(['id','image_source','name','price'])
+            ->orderByDesc('published_date')
+            ->paginate(10);
+        });
         return $products;
     }
     /* public function getMonthlyNewProducts()
@@ -34,13 +40,20 @@ class ProductController extends Controller
         ->select('product_id',DB::raw('count(product_id)'))
         ->groupBy('product_id')
         ->orderBy('count(product_id)','DESC')
-        ->take(5);
+        ->take(8);
         $products = Product::select(['id','name','image_source','price'])
         ->joinSub($popular_products_list,'popular',function($join)
         {
             $join->on('products.id','=','popular.product_id');
         }
         )->get();
+        if($products->isEmpty())
+        {
+            $products = Product::select(['id','image_source','name','price'])
+            ->orderByDesc('published_date')
+            ->take(8);
+            return $products;
+        }
         return $products;
     }
     public function getProduct(Request $request)
