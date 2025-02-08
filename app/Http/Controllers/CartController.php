@@ -97,8 +97,8 @@ class CartController extends Controller
             $checkout_session = $stripe->checkout->sessions->create([
                 'line_items' => $lineItems,
                 'mode' => 'payment',
-                'success_url' => 'http://localhost:5173'.'/eric_bookstore'.'/success?session_id={CHECKOUT_SESSION_ID}',
-                'cancel_url' => 'http://localhost:5173'.'/eric_bookstore'.'/cancel',
+                'success_url' => env('FRONTEND_URL').'/success?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => env('FRONTEND_URL').'/cancel',
             ]);
             //產生未付款訂單
             $order = order::create([
