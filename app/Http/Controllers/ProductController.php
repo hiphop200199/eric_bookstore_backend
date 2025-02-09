@@ -51,7 +51,7 @@ class ProductController extends Controller
 
             return Product::getList();
         });
-        if($products->isEmpty())
+      /*   if($products->isEmpty())
         {
             $products = Product::select(['id','image_source','name','price'])
             ->orderByDesc('published_date')
@@ -59,7 +59,7 @@ class ProductController extends Controller
             ->get()
             ;
             return $products;
-        }
+        } */
         return $products;
     }
     public function getProduct(Request $request)
