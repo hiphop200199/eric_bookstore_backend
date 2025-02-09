@@ -41,7 +41,7 @@ class ProductController extends Controller
         ->groupBy('product_id')
         ->orderBy('count(product_id)','DESC')
         ->take(8); */
-        $products = Cache::remember('popular-list',3600,function() {
+       // $products = Cache::remember('popular-list',60,function() {
           /*   return Product::select(['id','name','image_source','price'])
             ->joinSub($popular_products_list,'popular',function($join)
             {
@@ -49,8 +49,8 @@ class ProductController extends Controller
             }
             )->get(); */
 
-            return Product::getList();
-        });
+            //return Product::getList();
+       // });
       /*   if($products->isEmpty())
         {
             $products = Product::select(['id','image_source','name','price'])
@@ -60,7 +60,7 @@ class ProductController extends Controller
             ;
             return $products;
         } */
-        return $products;
+        return Product::getList();
     }
     public function getProduct(Request $request)
     {
