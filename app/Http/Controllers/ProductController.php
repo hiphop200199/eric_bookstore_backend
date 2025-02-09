@@ -36,24 +36,28 @@ class ProductController extends Controller
     } */
     public function getPopularProducts()
     {
-        $popular_products_list = DB::table('order_details')
+    /*     $popular_products_list = DB::table('order_details')
         ->select('product_id',DB::raw('count(product_id)'))
         ->groupBy('product_id')
         ->orderBy('count(product_id)','DESC')
-        ->take(8);
-        $products = Cache::remember('popular-list',3600,function() use ($popular_products_list){
-            return Product::select(['id','name','image_source','price'])
+        ->take(8); */
+        $products = Cache::remember('popular-list',3600,function() {
+          /*   return Product::select(['id','name','image_source','price'])
             ->joinSub($popular_products_list,'popular',function($join)
             {
                 $join->on('products.id','=','popular.product_id');
             }
-            )->get();
+            )->get(); */
+
+            return Product::getList();
         });
         if($products->isEmpty())
         {
             $products = Product::select(['id','image_source','name','price'])
             ->orderByDesc('published_date')
-            ->take(8);
+            ->take(8)
+            ->get()
+            ;
             return $products;
         }
         return $products;
